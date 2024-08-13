@@ -1,39 +1,38 @@
-name: Deploy VitePress Site to GitHub Pages
+name: gh-pages
 
 on:
   push:
     branches:
-      - main # 或者您希望触发部署的分支名称
+      - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # 获取所有历史记录，以支持子模块等
 
-      - name: Setup Node.js
+      - name: Pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
+
+      - name: Node
         uses: actions/setup-node@v3
         with:
-          node-version: 20 # 或者您希望使用的 Node.js 版本
+          cache: pnpm
+          node-version: 16
 
-      - name: Install Dependencies
+      - name: Setup
         run: |
-          npm install -g pnpm
-          pnpm install --no-optional
-          # 或者使用 pnpm: pnpm install --no-optional
+          pnpm install
 
-      - name: Build VitePress Site
-        run: pnpm docs:build
-        # 或者使用 pnpm: pnpm docs:build
+      - name: Build
+        run: |
+          pnpm build
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/.vitepress/dist # 您的构建输出目录
-          user_name: luoyuanxiang # 可选
-          user_email: 1141306760@qq.com # 可选
-          publish_branch: gh-pages
+          publish_dir: ./docs/.vitepress/dist
