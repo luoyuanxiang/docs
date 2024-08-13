@@ -14,6 +14,9 @@ const defaultSelector = ':not(a) > img:not(.image-src, .visitor, .vp-sponsor-gri
 export const mediumZoomSymbol: InjectionKey<Zoom> = Symbol('medium-zoom')
 
 export const createMediumZoomProvider = (app: App, router: Router) => {
+    if (typeof window === 'undefined') {
+        return
+    }
     const zoom = mediumZoom()
     // 扩展 zoom.refresh 方法
     zoom.refresh = (selector = defaultSelector) => {
