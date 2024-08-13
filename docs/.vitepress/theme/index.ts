@@ -13,7 +13,7 @@ import './style/index.scss'
 import codeblocksFold from 'vitepress-plugin-codeblocks-fold'
 import 'vitepress-plugin-codeblocks-fold/style/index.css'
 
-import NavLink from './components/Navlink.vue'
+import NavLink from './components/NavLink.vue'
 
 let homePageStyle: HTMLStyleElement | undefined
 
