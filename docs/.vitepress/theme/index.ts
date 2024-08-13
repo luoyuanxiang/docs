@@ -1,0 +1,91 @@
+import {h, watch} from 'vue'
+import {useData, EnhanceAppContext, Theme, useRoute} from 'vitepress'
+import DefaultTheme from 'vitepress/theme'
+
+import {createMediumZoomProvider} from './composables'
+
+import MLayout from './components/MLayout.vue'
+import MNavLinks from './components/MNavLinks.vue'
+
+import './style/index.scss'
+
+import codeblocksFold from 'vitepress-plugin-codeblocks-fold'
+import 'vitepress-plugin-codeblocks-fold/style/index.css'
+import imageViewer from "vitepress-plugin-image-viewer/lib/viewer"
+import vImageViewer from 'vitepress-plugin-image-viewer/lib/vImageViewer.vue'
+
+let homePageStyle: HTMLStyleElement | undefined
+
+export const layout: Theme = {
+    extends: DefaultTheme,
+    Layout: () => {
+        const props: Record<string, any> = {}
+        // 获取 frontmatter
+        const {frontmatter} = useData()
+        /* 添加自定义 class */
+        if (frontmatter.value?.layoutClass) {
+            props.class = frontmatter.value.layoutClass
+        }
+        return h(MLayout, props)
+    },
+    enhanceApp({app, router}: EnhanceAppContext) {
+        createMediumZoomProvider(app, router)
+        app.provide('DEV', false)
+        app.component('MNavLinks', MNavLinks)
+        app.component('vImageViewer', vImageViewer)
+        if (typeof window !== 'undefined') {
+            watch(
+                () => router.route.data.relativePath,
+                () =>
+                    updateHomePageStyle(
+                        /* /vitepress-nav-template/ 是为了兼容 GitHub Pages */
+                        location.pathname === '/' || location.pathname === '/vitepress-nav-template/',
+                    ),
+                {immediate: true},
+            )
+        }
+    },
+    setup() {
+        // get frontmatter and route
+        const {frontmatter} = useData();
+        const route = useRoute()
+        // basic use
+        codeblocksFold({route, frontmatter}, true, 400)
+
+        // Using
+        imageViewer(route)
+    }
+}
+
+if (typeof window !== 'undefined') {
+    // detect browser, add to class for conditional styling
+    const browser = navigator.userAgent.toLowerCase()
+    if (browser.includes('chrome')) {
+        document.documentElement.classList.add('browser-chrome')
+    } else if (browser.includes('firefox')) {
+        document.documentElement.classList.add('browser-firefox')
+    } else if (browser.includes('safari')) {
+        document.documentElement.classList.add('browser-safari')
+    }
+}
+
+// Speed up the rainbow animation on home page
+function updateHomePageStyle(value: boolean) {
+    if (value) {
+        if (homePageStyle) return
+
+        homePageStyle = document.createElement('style')
+        homePageStyle.innerHTML = `
+    :root {
+      animation: rainbow 12s linear infinite;
+    }`
+        document.body.appendChild(homePageStyle)
+    } else {
+        if (!homePageStyle) return
+
+        homePageStyle.remove()
+        homePageStyle = undefined
+    }
+}
+
+export default layout
