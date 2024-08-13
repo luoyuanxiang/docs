@@ -7,6 +7,7 @@ import Giscus from '@giscus/vue'
 import {usePageId} from '../composables'
 
 import MDocFooter from './MDocFooter.vue'
+import BackToTop from "./BackToTop.vue";
 
 const {Layout} = DefaultTheme
 const {isDark, theme, frontmatter} = useData()
@@ -57,9 +58,7 @@ provide('toggle-appearance', async ({clientX: x, clientY: y}: MouseEvent) => {
       https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/Layout.vue
     -->
     <template #nav-bar-title-after>
-      <div></div>
     </template>
-
     <template v-if="comment && frontmatter.comment !== false" #doc-footer-before>
       <div class="doc-comments">
         <Giscus
@@ -80,6 +79,7 @@ provide('toggle-appearance', async ({clientX: x, clientY: y}: MouseEvent) => {
 
     <template #doc-after>
       <MDocFooter/>
+      <Confetti />
     </template>
   </Layout>
 </template>

@@ -1,13 +1,23 @@
-import type {NavLink} from '../../.vitepress/theme/types'
-
 type NavData = {
     title: string
+    desc: string
     items: NavLink[]
+}
+type NavLink = {
+    /** 站点图标 */
+    icon?: string | { svg: string }
+    /** 站点名称 */
+    title: string
+    /** 站点名称 */
+    desc?: string
+    /** 站点链接 */
+    link: string
 }
 
 export const NAV_DATA: NavData[] = [
     {
         title: '常用工具',
+        desc: '常用工具',
         items: [
             {
                 icon: 'https://pdai.tech/apple-touch-icon.png',
@@ -73,6 +83,7 @@ export const NAV_DATA: NavData[] = [
     },
     {
         title: '常用文章记录',
+        desc: '常用文章记录',
         items: [
             {
                 icon: 'https://docs.emqx.com/favicon.ico',
@@ -126,6 +137,7 @@ export const NAV_DATA: NavData[] = [
     },
     {
         title: 'AI 导航',
+        desc: 'AI 导航',
         items: [
             {
                 icon: '/icons/chatgpt.png',
@@ -157,6 +169,7 @@ export const NAV_DATA: NavData[] = [
     },
     {
         title: '小程序相关',
+        desc: '小程序相关',
         items: [
             {
                 icon: 'https://res.wx.qq.com/a/wx_fed/assets/res/OTE0YTAw.png',
@@ -186,6 +199,7 @@ export const NAV_DATA: NavData[] = [
     },
     {
         title: '站点生成器',
+        desc: '站点生成器',
         items: [
             {
                 icon: 'https://astro.build/favicon.svg',
@@ -221,6 +235,7 @@ export const NAV_DATA: NavData[] = [
     },
     {
         title: '图标库',
+        desc: '图标库',
         items: [
             {
                 icon: 'https://img.alicdn.com/imgextra/i4/O1CN01Z5paLz1O0zuCC7osS_!!6000000001644-55-tps-83-82.svg',
@@ -244,6 +259,7 @@ export const NAV_DATA: NavData[] = [
     },
     {
         title: '社区',
+        desc: '社区',
         items: [
             {
                 title: 'Github',
@@ -299,6 +315,7 @@ export const NAV_DATA: NavData[] = [
     },
     {
         title: '摸鱼专用',
+        desc: '摸鱼专用',
         items: [
             {
                 icon: 'https://momoyu.cc/icon-192.png',
@@ -316,6 +333,7 @@ export const NAV_DATA: NavData[] = [
     },
     {
         title: '免费 API 接口',
+        desc: '免费 API 接口',
         items: [
             {
                 icon: 'https://www.jinrishici.com/img/icon-small.png',

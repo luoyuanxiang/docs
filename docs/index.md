@@ -25,7 +25,7 @@ features:
   - icon: 📘
     title: 源码阅读
     details: 了解各种库的实现原理<br />学习其中的小技巧和冷知识
-    link: https://notes.fe-mm.com/analysis/utils/only-allow
+    link: /
     linkText: 源码阅读
   - icon: 💡
     title: Workflow
@@ -46,6 +46,7 @@ features:
     title: 吾志所向，一往无前。
     details: '<small class="bottom-small">一个想躺平的小开发</small>'
 ---
+
 
 <style>
 .VPHome .image-src:hover {

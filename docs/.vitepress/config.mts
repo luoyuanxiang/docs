@@ -1,5 +1,6 @@
 import {defineConfig} from 'vitepress'
 import {nav, sidebar, socialLinks, search, head} from './configs'
+import timeline from "vitepress-markdown-timeline"
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -20,7 +21,11 @@ export default defineConfig({
         // 行号
         lineNumbers: true,
         // 主题
-        theme: 'slack-ochin',
+        // theme: 'slack-ochin',
+        //时间线
+        config: (md) => {
+            md.use(timeline);
+        },
     },
     // https://vitepress.dev/reference/default-theme-config
     themeConfig: {

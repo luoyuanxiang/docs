@@ -2,6 +2,7 @@
 import {computed} from 'vue'
 import {useData} from 'vitepress'
 import {useSidebar} from 'vitepress/theme'
+import BackToTop from "./BackToTop.vue";
 
 const {theme} = useData()
 const {footer} = theme.value
@@ -22,6 +23,7 @@ const isDocFooterVisible = computed(() => {
       {{ footer.copyright }}
     </p>
   </div>
+  <back-to-top />
 </template>
 
 <style scoped>

@@ -4,9 +4,9 @@ import {DefaultTheme} from 'vitepress'
 export const nav: DefaultTheme.Config['nav'] = [
     {
         text: '❁导航',
-        link: '/pages/tools',
+        link: '/pages/nav',
         noIcon: true,
-        activeMatch: '/pages/tools'
+        activeMatch: '/pages/nav'
     },
     {
         text: '♥后端笔记',

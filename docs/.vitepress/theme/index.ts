@@ -1,20 +1,26 @@
-import {h, watch} from 'vue'
+import {h, nextTick, onMounted, watch} from 'vue'
 import {useData, EnhanceAppContext, Theme, useRoute} from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 
-import {createMediumZoomProvider} from './composables'
 
 import MLayout from './components/MLayout.vue'
-import MNavLinks from './components/MNavLinks.vue'
+
+
+import mediumZoom from 'medium-zoom'
 
 import './style/index.scss'
 
 import codeblocksFold from 'vitepress-plugin-codeblocks-fold'
 import 'vitepress-plugin-codeblocks-fold/style/index.css'
-import imageViewer from "vitepress-plugin-image-viewer/lib/viewer"
-import vImageViewer from 'vitepress-plugin-image-viewer/lib/vImageViewer.vue'
+
+import NavLink from './components/Navlink.vue'
 
 let homePageStyle: HTMLStyleElement | undefined
+
+// 只需添加以下一行代码，引入时间线样式
+import 'vitepress-markdown-timeline/dist/theme/index.css'
+
+import Confetti from './components/Confetti.vue'
 
 export const layout: Theme = {
     extends: DefaultTheme,
@@ -29,17 +35,14 @@ export const layout: Theme = {
         return h(MLayout, props)
     },
     enhanceApp({app, router}: EnhanceAppContext) {
-        createMediumZoomProvider(app, router)
-        app.provide('DEV', false)
-        app.component('MNavLinks', MNavLinks)
-        app.component('vImageViewer', vImageViewer)
+        app.component('NavLink', NavLink)
+        app.component('Confetti', Confetti)
         if (typeof window !== 'undefined') {
             watch(
                 () => router.route.data.relativePath,
                 () =>
                     updateHomePageStyle(
-                        /* /vitepress-nav-template/ 是为了兼容 GitHub Pages */
-                        location.pathname === '/' || location.pathname === '/vitepress-nav-template/',
+                        location.pathname === '/' || location.pathname === '/docs/',
                     ),
                 {immediate: true},
             )
@@ -51,9 +54,17 @@ export const layout: Theme = {
         const route = useRoute()
         // basic use
         codeblocksFold({route, frontmatter}, true, 400)
-
-        // Using
-        imageViewer(route)
+        const initZoom = () => {
+            // mediumZoom('[data-zoomable]', { background: 'var(--vp-c-bg)' }); // 默认
+            mediumZoom('.main img', {background: 'var(--vp-c-bg)'}); // 不显式添加{data-zoomable}的情况下为所有图像启用此功能
+        };
+        onMounted(() => {
+            initZoom();
+        });
+        watch(
+            () => route.path,
+            () => nextTick(() => initZoom())
+        );
     }
 }
 
