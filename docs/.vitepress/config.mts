@@ -1,32 +1,16 @@
 import {defineConfig} from 'vitepress'
-import {nav, sidebar, socialLinks, search} from './configs'
+import {nav, sidebar, socialLinks, search, head} from './configs'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "技术知识整理",
     description: "个人所学的技术知识整理",
+    base: '/docs/',
     // 站点地图
     sitemap: {
         hostname: 'https://luoyuanxiang.top',
     },
-    head: [
-        ['link', {rel: 'icon', href: '/logo.jpg'}],
-        [
-            "script",
-            {
-                async: true,
-                src: "https://www.googletagmanager.com/gtag/js?id=这里换成你在谷歌analytics的key",
-            },
-        ],
-        [
-            "script",
-            {},
-            `window.dataLayer = window.dataLayer || [];
-       function gtag(){dataLayer.push(arguments);}
-       gtag('js', new Date());
-       gtag('config', '这里换成你在谷歌analytics的key');`,
-        ],
-    ],
+    head,
     // markdown配置
     markdown: {
         image: {
