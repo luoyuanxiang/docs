@@ -79,7 +79,6 @@ provide('toggle-appearance', async ({clientX: x, clientY: y}: MouseEvent) => {
 
     <template #doc-after>
       <MDocFooter/>
-      <Confetti />
     </template>
   </Layout>
 </template>

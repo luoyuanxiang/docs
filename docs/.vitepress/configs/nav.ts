@@ -3,12 +3,6 @@ import {DefaultTheme} from 'vitepress'
 // 菜单配置
 export const nav: DefaultTheme.Config['nav'] = [
     {
-        text: '❁导航',
-        link: '/pages/nav',
-        noIcon: true,
-        activeMatch: '/pages/nav'
-    },
-    {
         text: '♥后端笔记',
         link: '/pages/rear',
         activeMatch: '/pages/rear'
