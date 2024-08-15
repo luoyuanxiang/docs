@@ -38,7 +38,9 @@ export default defineConfig({
         socialLinks,
         // 本地搜索
         search,
-        lastUpdatedText: '上次修改时间',
+        lastUpdated: {
+            text: '上次修改时间'
+        },
         darkModeSwitchLabel: '主题',
         sidebarMenuLabel: '菜单',
         returnToTopLabel: '返回顶部',

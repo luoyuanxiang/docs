@@ -7,13 +7,14 @@ import Giscus from '@giscus/vue'
 import {usePageId} from '../composables'
 
 import MDocFooter from './MDocFooter.vue'
-import BackToTop from "./BackToTop.vue";
 
 const {Layout} = DefaultTheme
 const {isDark, theme, frontmatter} = useData()
 const pageId = usePageId()
 
 const {comment} = theme.value
+
+import BackToTop from './BackToTop/BackToTop.vue'
 
 const enableTransitions = () =>
     'startViewTransition' in document &&
@@ -80,6 +81,7 @@ provide('toggle-appearance', async ({clientX: x, clientY: y}: MouseEvent) => {
     <template #doc-after>
       <MDocFooter/>
     </template>
+    <BackToTop />
   </Layout>
 </template>
 

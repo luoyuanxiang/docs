@@ -2,7 +2,7 @@
 import {computed} from 'vue'
 import {useData} from 'vitepress'
 import {useSidebar} from 'vitepress/theme'
-import BackToTop from "./BackToTop.vue";
+import BackToTop from "./BackToTop/BackToTop.vue";
 
 const {theme} = useData()
 const {footer} = theme.value

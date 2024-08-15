@@ -11,10 +11,10 @@ hero:
   actions:
     - theme: brand
       text: MD 示例
-      link: /pages/markdown-examples
+      link: /md/markdown-examples
     - theme: alt
       text: icon图标
-      link: /pages/icon
+      link: /md/icon
 
 features:
   - icon: 📖
