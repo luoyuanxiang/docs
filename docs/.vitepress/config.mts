@@ -4,7 +4,7 @@ import timeline from "vitepress-markdown-timeline"
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-    title: "技术知识整理",
+    title: "个人知识库",
     description: "个人所学的技术知识整理",
     base: '/docs/',
     // 站点地图
@@ -29,7 +29,7 @@ export default defineConfig({
     },
     // https://vitepress.dev/reference/default-theme-config
     themeConfig: {
-        logo: '/logo.jpg',
+        logo: '/logo.png',
         // 导航
         nav,
         // 侧边栏
@@ -49,7 +49,7 @@ export default defineConfig({
         footer: {
             message: '基于 MIT 许可发布',
             // 自动更新时间
-            copyright: `版权所有 © 2023-${new Date().getFullYear()} 技术知识整理`,
+            copyright: `版权所有 © 2023-${new Date().getFullYear()} 个人知识库`,
         },
         outline: {
             level: "deep", // 显示2-4级标题

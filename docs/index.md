@@ -3,11 +3,11 @@
 layout: home
 
 hero:
-  name: "技术知识整理"
+  name: "个人知识库"
 #  text: "整理所学知识"
   tagline: 整理所学知识
   image:
-    src: https://vitepress.dev/vitepress-logo-large.webp
+    src: /logo.png
   actions:
     - theme: brand
       text: MD 示例
