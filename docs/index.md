@@ -3,48 +3,32 @@
 layout: home
 
 hero:
-  name: "个人知识库"
-#  text: "整理所学知识"
-  tagline: 整理所学知识
+  name: "罗远祥的知识库"
+  text: "专注 & 洞察 & 分享"
+  tagline: 个人技术知识库，记录 & 分享个人碎片化、结构化、体系化的技术知识内容。
   image:
     src: /logo.png
   actions:
     - theme: brand
-      text: MD 示例
-      link: /md/markdown-examples
+      text: 快速开始
+      link: /md/系统架构师/计算机基础/1.计算机硬件组成
     - theme: alt
-      text: icon图标
-      link: /md/icon
+      text: 在 GitHub 查看
+      link: https://github.com/luoyuanxiang/docs
 
 features:
-  - icon: 📖
-    title: 物语
-    details: 整理常用知识点<small>（面试八股文）</small><br />如有异议按你的理解为主，不接受反驳
-    link: /
-    linkText: 前端常用知识
-  - icon: 📘
-    title: 源码阅读
-    details: 了解各种库的实现原理<br />学习其中的小技巧和冷知识
-    link: /
-    linkText: 源码阅读
-  - icon: 💡
-    title: Workflow
-    details: 在工作中学到的一切<small>（常用库/工具/奇淫技巧等）</small><br />配合 CV 大法来更好的摸鱼
-    link: /
-    linkText: 常用工具库
-  - icon: 🧰
-    title: 提效工具
-    details: 工欲善其事，必先利其器<br />记录开发和日常使用中所用到的软件、插件、扩展等
-    link: /
-    linkText: 提效工具
-  - icon: 🐞
-    title: 踩坑记录
-    details: 那些年我们踩过的坑<br />总有一些让你意想不到的问题
-    link: /
-    linkText: 踩坑记录
-  - icon: 💯
-    title: 吾志所向，一往无前。
-    details: '<small class="bottom-small">一个想躺平的小开发</small>'
+  - icon:
+      src: /svg/focus.svg
+    title: 保持专注
+    details: “简单比复杂更难，你必须努力让你的想法变得清晰明了，让它变得简单。一旦你做到了简单，你就能搬动大山。” -- 乔布斯
+  - icon:
+      src: /svg/insight.svg
+    title: 善于洞察
+    details: “我既没有突出的理解力，也没有过人的机智。只在觉察那些稍纵即逝的事物并对其进行精细观察的能力上，我可能在普通人之上。” -- 达尔文
+  - icon:
+      src: /svg/knowledge.svg
+    title: 乐于分享
+    details: 关于分享，有形的物品越分越少，无形的知识越分越多。在记录与分享的过程中, 梳理所学, 交流所得, 必有所获。
 ---
 
 
