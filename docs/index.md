@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: 快速开始
-      link: /md/系统架构师/计算机基础/1.计算机硬件组成
+      link: /系统架构师/01-计算机基础/index
     - theme: alt
       text: 在 GitHub 查看
       link: https://github.com/luoyuanxiang/docs

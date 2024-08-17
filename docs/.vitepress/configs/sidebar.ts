@@ -7,7 +7,7 @@ import {getChineseZodiac, getChineseZodiacAlias} from '../theme/utils/utils';
 const sync = fg.sync;
 
 export const sidebar: DefaultTheme.Config['sidebar'] = {
-    '/md/系统架构师': getItems("md/系统架构师"),
+    '/系统架构师/01-计算机基础': getItems("系统架构师/01-计算机基础"),
 }
 
 /**

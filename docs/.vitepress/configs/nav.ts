@@ -24,8 +24,14 @@ export const nav: DefaultTheme.Config['nav'] = [
     // },
     {
         text: '♥系统架构师',
-        link: '/md/系统架构师/计算机基础/1.计算机硬件组成',
-        activeMatch: '/系统架构师/'
+        activeMatch: '/系统架构师/',
+        items: [
+            {
+                text: '计算机基础',
+                link: '/系统架构师/01-计算机基础/index',
+                activeMatch: '/系统架构师/01-计算机基础'
+            }
+        ]
     },
     // {
     //     text: '♥指南',
