@@ -13,6 +13,10 @@ export const markdown: MarkdownOptions = {
     // 行号
     lineNumbers: true,
     config: (md: MarkdownRenderer) => {
-
+        md.renderer.rules.image = (tokens, idx, options, env, slf) => {
+            let htmlResult = slf.renderToken(tokens, idx, options);
+            // console.log(htmlResult)
+            return htmlResult;
+        }
     },
 };

@@ -2,7 +2,7 @@ import {DefaultTheme} from 'vitepress'
 
 import fg from 'fast-glob';
 import matter from 'gray-matter';
-import {getChineseZodiac, getChineseZodiacAlias} from '../theme/utils/utils';
+import {getChineseZodiac, getChineseZodiacAlias} from '../theme/utils';
 
 const sync = fg.sync;
 

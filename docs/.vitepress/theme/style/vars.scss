@@ -111,15 +111,6 @@
 }
 
 /* .vitepress\theme\style\var.css */
-h1 {
-  background: -webkit-linear-gradient(-45deg, #e43498 5%, #5ad7dd 15%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-}
-
-/* .vitepress\theme\style\var.css */
 /* 提示框背景颜色 */
 :root {
   --vp-custom-block-tip-bg: var(--vp-c-green-soft);
@@ -178,4 +169,12 @@ h1 {
 
 .mr-\[6px\] {
   margin-right: 6px;
+}
+
+/* .vitepress\theme\style\var.css */
+h1 {
+  background: -webkit-linear-gradient(-45deg, var(--vp-c-brand-1) 5%, var(--vp-c-brand-next) 15%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

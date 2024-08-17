@@ -2,9 +2,7 @@ import {h, nextTick, onMounted, watch} from 'vue'
 import {useData, EnhanceAppContext, Theme, useRoute} from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 
-
 import MLayout from './components/MLayout.vue'
-
 
 import mediumZoom from 'medium-zoom'
 
