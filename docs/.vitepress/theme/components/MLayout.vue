@@ -52,7 +52,7 @@ provide('toggle-appearance', async ({clientX: x, clientY: y}: MouseEvent) => {
         https://vitepress.dev/zh/guide/extending-default-theme#layout-slots
         https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/Layout.vue
       -->
-      <BackToTop/>
     </Layout>
   </ClientOnly>
+  <BackToTop/>
 </template>

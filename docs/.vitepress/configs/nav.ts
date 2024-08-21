@@ -30,7 +30,7 @@ export const nav: DefaultTheme.Config['nav'] = [
                 text: '计算机基础',
                 link: '/系统架构师/01-计算机基础/index',
                 activeMatch: '/系统架构师/01-计算机基础'
-            }
+            },
         ]
     },
     // {
