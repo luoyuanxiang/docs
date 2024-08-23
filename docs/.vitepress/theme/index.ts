@@ -10,6 +10,7 @@ import './style/index.scss'
 
 import codeblocksFold from 'vitepress-plugin-codeblocks-fold'
 import 'vitepress-plugin-codeblocks-fold/style/index.css'
+import Mermaid from "./components/Mermaid.vue";
 
 
 let homePageStyle: HTMLStyleElement | undefined
@@ -27,6 +28,7 @@ export const layout: Theme = {
         return h(MLayout, props)
     },
     enhanceApp({app, router}: EnhanceAppContext) {
+        app.component('Mermaid', Mermaid)
         if (typeof window !== 'undefined') {
             watch(
                 () => router.route.data.relativePath,
