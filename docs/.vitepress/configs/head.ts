@@ -17,7 +17,7 @@ export const head: HeadConfig[] = [
     ['meta', {property: 'og:locale', content: 'zh_CN'}],
     ['meta', {property: 'og:title', content: '罗远祥的知识库'}],
     ['meta', {property: 'og:description', content: '个人技术知识库，记录 & 分享个人碎片化、结构化、体系化的技术知识内容。'}],
-    ['meta', {property: 'og:site', content: 'https://luoyuanxiang.top/docs'}],
+    ['meta', {property: 'og:site', content: 'https://docs.luoyuanxiang.top'}],
     ['meta', {property: 'og:site_name', content: '罗远祥的知识库'}],
     ['meta', {property: 'og:image', content: 'https://luoyuanxiang.top/docs/logo.png'}],
 
