@@ -5,7 +5,7 @@ import {themeConfig, head, markdown} from './configs'
 export default defineConfig({
     title: "罗远祥的知识库",
     description: "个人技术知识库，记录 & 分享个人碎片化、结构化、体系化的技术知识内容。",
-    base: '/docs/',
+    base: '/',
     // 站点地图
     sitemap: {
         hostname: 'https://docs.luoyuanxiang.top',
