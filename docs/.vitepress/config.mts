@@ -8,7 +8,7 @@ export default defineConfig({
     base: '/docs/',
     // 站点地图
     sitemap: {
-        hostname: 'https://luoyuanxiang.top/docs',
+        hostname: 'https://docs.luoyuanxiang.top',
     },
     head,
     // markdown配置
