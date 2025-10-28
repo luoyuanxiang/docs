@@ -49,6 +49,31 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
+        .control-panel .row {
+            margin-bottom: 15px;
+        }
+
+        .control-panel .row:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-group-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+
+        .form-check-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
         .log-windows-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -264,8 +289,9 @@
 
         <!-- 控制面板 -->
         <div class="control-panel">
-            <div class="row align-items-center">
-                <div class="col-md-4">
+            <!-- 第一行：MAC地址、环境选择、连接按钮、状态 -->
+            <div class="row align-items-center mb-3">
+                <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="bi bi-router"></i>
@@ -273,7 +299,7 @@
                         <input type="text" class="form-control form-control-custom" id="macInput" placeholder="请输入MAC地址">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="environment" id="prodEnv" value="prod" checked>
                         <label class="form-check-label" for="prodEnv">正式环境</label>
@@ -283,7 +309,7 @@
                         <label class="form-check-label" for="testEnv">测试环境</label>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <button class="btn btn-success btn-custom" id="connectBtn">
                         <i class="bi bi-wifi me-2"></i>连接MQTT
                     </button>
@@ -293,6 +319,48 @@
                         <span class="status-indicator status-disconnected" id="statusIndicator"></span>
                         <span id="statusText">未连接</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- 第二行：线路名称输入和获取公交可占道信息按钮 -->
+            <div class="row align-items-center mb-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-signpost"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-custom" id="routeNameInput" placeholder="请输入线路名称">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-warning btn-custom" id="getLaneInfoBtn">
+                        <i class="bi bi-car-front me-2"></i>获取公交可占道信息
+                    </button>
+                </div>
+            </div>
+
+            <!-- 第三行：任务ID输入、推送任务ID输入、回调文件解密失败按钮 -->
+            <div class="row align-items-center mb-3">
+                <div class="col-md-2">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-hash"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-custom" id="taskIdInput" placeholder="任务ID">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-send"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-custom" id="pushTaskIdInput" placeholder="推送任务ID">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-danger btn-custom" id="decryptFailBtn">
+                        <i class="bi bi-shield-exclamation me-2"></i>回调文件解密失败
+                    </button>
                 </div>
             </div>
         </div>
@@ -334,9 +402,6 @@
                 </button>
                 <button class="btn btn-info btn-custom" id="getFlightDataBtn">
                     <i class="bi bi-airplane me-2"></i>获取天府机场航班数据
-                </button>
-                <button class="btn btn-warning btn-custom" id="getLaneInfoBtn">
-                    <i class="bi bi-car-front me-2"></i>获取公交车道占道信息
                 </button>
                 <button class="btn btn-danger btn-custom" id="closeAllMqttBtn">
                     <i class="bi bi-x-circle me-2"></i>关闭所有MQTT连接
@@ -446,7 +511,8 @@
             document.getElementById('resendProgramBtn').addEventListener('click', () => sendCommand('resendProgram'));
             document.getElementById('getStaticRouteBtn').addEventListener('click', () => sendCommand('getStaticRoute'));
             document.getElementById('getFlightDataBtn').addEventListener('click', () => sendCommand('getFlightData'));
-            document.getElementById('getLaneInfoBtn').addEventListener('click', () => sendCommand('getLaneInfo'));
+            document.getElementById('getLaneInfoBtn').addEventListener('click', () => getLaneInfo());
+            document.getElementById('decryptFailBtn').addEventListener('click', () => decryptFail());
             document.getElementById('closeAllMqttBtn').addEventListener('click', () => sendCommand('closeAllMqtt'));
             document.getElementById('clearWillMsgBtn').addEventListener('click', () => sendCommand('clearWillMsg'));
         }
@@ -680,6 +746,88 @@
             .catch(error => {
                 console.error('命令执行失败:', error);
                 alert(`命令 ${command} 执行失败: ${error.message}`);
+            });
+        }
+
+        // 获取公交可占道信息
+        function getLaneInfo() {
+            const routeName = document.getElementById('routeNameInput').value.trim();
+            const macAddress = document.getElementById('macInput').value.trim();
+            const environment = document.querySelector('input[name="environment"]:checked').value;
+            
+            if (!routeName) {
+                alert('请输入线路名称');
+                return;
+            }
+            
+            if (!macAddress) {
+                alert('请输入MAC地址');
+                return;
+            }
+
+            const baseUrl = environment === 'prod' ? 'http://10.30.148.105:8080' : 'http://10.30.148.105:8080';
+            const url = `${baseUrl}/api/lane-info`;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    mac: macAddress,
+                    routeName: routeName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('获取公交可占道信息结果:', data);
+                alert(`获取线路 ${routeName} 的占道信息成功`);
+            })
+            .catch(error => {
+                console.error('获取公交可占道信息失败:', error);
+                alert(`获取公交可占道信息失败: ${error.message}`);
+            });
+        }
+
+        // 回调文件解密失败
+        function decryptFail() {
+            const taskId = document.getElementById('taskIdInput').value.trim();
+            const pushTaskId = document.getElementById('pushTaskIdInput').value.trim();
+            const macAddress = document.getElementById('macInput').value.trim();
+            const environment = document.querySelector('input[name="environment"]:checked').value;
+            
+            if (!taskId || !pushTaskId) {
+                alert('请输入任务ID和推送任务ID');
+                return;
+            }
+            
+            if (!macAddress) {
+                alert('请输入MAC地址');
+                return;
+            }
+
+            const baseUrl = environment === 'prod' ? 'http://10.30.148.105:8080' : 'http://10.30.148.105:8080';
+            const url = `${baseUrl}/api/decrypt-fail`;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    mac: macAddress,
+                    taskId: taskId,
+                    pushTaskId: pushTaskId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('回调文件解密失败处理结果:', data);
+                alert(`任务ID ${taskId} 解密失败处理完成`);
+            })
+            .catch(error => {
+                console.error('回调文件解密失败处理失败:', error);
+                alert(`回调文件解密失败处理失败: ${error.message}`);
             });
         }
 
