@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>实时日志监控与控制台</title>
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="./favicon.ico" />
+  <!-- Highlight.js for JSON syntax highlight -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" integrity="sha512-3cGq9D3kLLl5ciaYz8J8uejCz9fG13tWvFhnrYH7QvW1zjYo9cR9ex9M6/4GXL3lCLhMfs6mN4iVci0x2o0sFg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-8lQxP0G/3cTc9lpaYF9nKQAzlI8jz2lO9asD1zK71eqSUYv2QhyMao8b9EJkYQ2Y8pOVC2j6mC2yM6gHMu3h8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js" integrity="sha512-3pYjXJ8oFKx+1aPbG2WezcOt4t+zFAV2koeb1B/ms7MucDRwZC4pbsq98gFPPvJMNRr0nabB8z9pHqdz31v1KQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-elev: #101833;
+      --panel-bg: #0f1a3a;
+      --text: #e6eaf2;
+      --muted: #93a1bb;
+      --border: #22305a;
+      --primary: #3b82f6;
+      --warning: #f59e0b;
+      --info: #06b6d4;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 14px;
+      --radius-sm: 12px;
+      --radius-xs: 10px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #0a0f1e 100%);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px 20px 80px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: radial-gradient(120% 120% at 20% 20%, #3b82f6 0%, rgba(59,130,246,0.25) 45%, rgba(59,130,246,0) 60%),
+                  radial-gradient(100% 100% at 80% 20%, #06b6d4 0%, rgba(6,182,212,0.2) 45%, rgba(6,182,212,0) 60%);
+      box-shadow: inset 0 0 14px rgba(255,255,255,.06), var(--shadow);
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 4px rgba(255,255,255,0.03) inset; }
+    .dot.connected { background: var(--success); box-shadow: 0 0 12px rgba(34,197,94,.55); }
+    .dot.connecting { background: var(--warning); box-shadow: 0 0 12px rgba(245,158,11,.55); }
+    .dot.error { background: var(--danger); box-shadow: 0 0 12px rgba(239,68,68,.55); }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 14px;
+      background: linear-gradient(180deg, rgba(16,24,51,.65) 0%, rgba(12,18,40,.7) 100%);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      border-radius: var(--radius);
+      position: sticky;
+      top: 12px;
+      z-index: 5;
+      backdrop-filter: blur(10px);
+    }
+
+    .toolbar .row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .field {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: linear-gradient(180deg, rgba(12,18,40,.6), rgba(12,18,40,.4));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    .field label { font-size: 13px; color: var(--muted); }
+
+    .input {
+      min-width: 260px;
+      flex: 1 1 260px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #08102a;
+      color: var(--text);
+      outline: none;
+    }
+
+    .radio {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #0a1433;
+      cursor: pointer;
+      user-select: none;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .radio input { accent-color: var(--primary); }
+
+    .btn {
+      --btn-bg: #12214d;
+      --btn-bd: var(--border);
+      --btn-fg: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--btn-bd);
+      background: linear-gradient(180deg, var(--btn-bg), rgba(12,18,40,.8));
+      color: var(--btn-fg);
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: .2px;
+      transition: transform .05s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+      white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; }
+
+    .btn-primary { --btn-bg: linear-gradient(180deg, rgba(59,130,246,.35), rgba(17,24,39,.6)); --btn-bd: rgba(59,130,246,.45); }
+    .btn-warning { --btn-bg: linear-gradient(180deg, rgba(245,158,11,.35), rgba(17,24,39,.6)); --btn-bd: rgba(245,158,11,.45); }
+    .btn-info { --btn-bg: linear-gradient(180deg, rgba(6,182,212,.35), rgba(17,24,39,.6)); --btn-bd: rgba(6,182,212,.45); }
+    .btn-success { --btn-bg: linear-gradient(180deg, rgba(34,197,94,.35), rgba(17,24,39,.6)); --btn-bd: rgba(34,197,94,.45); }
+    .btn-danger { --btn-bg: linear-gradient(180deg, rgba(239,68,68,.35), rgba(17,24,39,.6)); --btn-bd: rgba(239,68,68,.45); }
+
+    .grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 240px;
+      max-height: 520px;
+      background: linear-gradient(180deg, rgba(15,26,58,.95), rgba(10,15,30,.95));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 12px 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      color: #0a0f1e;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0,0,0,.25) inset;
+    }
+    .chip.primary { background: linear-gradient(180deg, #60a5fa, #2563eb); }
+    .chip.warning { background: linear-gradient(180deg, #fbbf24, #d97706); }
+    .chip.info { background: linear-gradient(180deg, #22d3ee, #0891b2); }
+    .chip.success { background: linear-gradient(180deg, #4ade80, #16a34a); }
+    .chip.danger { background: linear-gradient(180deg, #f87171, #dc2626); }
+
+    .panel-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      width: 28px; height: 28px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: #0b122c; color: var(--muted);
+      cursor: pointer;
+    }
+
+    .panel-body {
+      padding: 10px 10px 12px 10px;
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #2b3b72 transparent;
+    }
+
+    .log-item {
+      position: relative;
+      padding: 8px 8px 8px 10px;
+      margin: 8px 0;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      transition: background .2s ease, border-color .2s ease;
+      cursor: copy;
+    }
+    .log-item:hover { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.12); }
+
+    .log-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; color: var(--muted); font-size: 12px; }
+    .log-meta .dot { width: 7px; height: 7px; }
+
+    .log-json pre { margin: 0; }
+    .log-json code { display: block; font-size: 12.5px; line-height: 1.35; }
+
+    .footer-bar {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      display: flex; flex-direction: column; gap: 8px;
+      z-index: 6;
+    }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      background: rgba(25, 36, 78, .9);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      z-index: 100;
+      font-weight: 600;
+      letter-spacing: .2px;
+    }
+
+    /* Max overlay */
+    .overlay {
+      position: fixed; inset: 0; z-index: 20; display: none;
+      background: rgba(7,10,20,.88);
+      backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .overlay.active { display: flex; }
+    .overlay-inner { width: min(1400px, 96vw); height: min(90vh, 840px); }
+    .overlay .panel { height: 100%; max-height: unset; box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+
+    /* Responsive tweaks */
+    @media (max-width: 960px) {
+      .toolbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <div class="brand">
+        <div class="brand-logo"></div>
+        <div class="title">实时日志监控与控制台</div>
+      </div>
+      <div class="status" id="sseStatus">
+        <span class="dot" id="sseDot"></span>
+        <span id="sseText">未连接</span>
+        <span class="badge" id="recvCount">0 条</span>
+        <span class="badge" id="dropCount" title="暂停时丢弃">丢弃 0</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="row">
+        <div class="field" style="flex: 1 1 360px;">
+          <label for="macInput">设备 MAC</label>
+          <input id="macInput" class="input" placeholder="请输入设备 MAC（如：AA:BB:CC:DD:EE:FF）" />
+        </div>
+        <div class="row">
+          <label class="radio"><input type="radio" name="env" value="prod" /> 正式环境</label>
+          <label class="radio"><input type="radio" name="env" value="test" checked /> 测试环境</label>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" id="btnMqttConnect">连接 MQTT</button>
+        </div>
+        <div class="row" style="justify-content: flex-end;">
+          <button class="btn" id="btnPause">暂停接收</button>
+          <button class="btn" id="btnResume" disabled>恢复接收</button>
+        </div>
+      </div>
+      <div class="row" style="grid-column: 1/-1;">
+        <button class="btn" id="btnClearAll">清除全部日志</button>
+        <span style="width: 1px; height: 30px; background: var(--border);"></span>
+        <button class="btn btn-primary" id="btnUpdateDeviceCache">更新设备缓存数据</button>
+        <button class="btn btn-primary" id="btnUpdateLineCache">更新线路缓存数据</button>
+        <button class="btn btn-warning" id="btnPushAllStaticLines">推送全部静态线路数据</button>
+        <button class="btn btn-info" id="btnRepushPrograms">重新推送节目清单</button>
+        <button class="btn btn-success" id="btnGetCurrentDeviceStatic">获取当前设备静态线路数据</button>
+        <button class="btn btn-success" id="btnGetTianfuFlights">获取天府机场航班数据</button>
+        <button class="btn btn-info" id="btnGetBusLane">获取公交车道占道信息</button>
+        <span style="width: 1px; height: 30px; background: var(--border);"></span>
+        <button class="btn btn-danger" id="btnCloseAllMqtt">关闭所有MQTT连接</button>
+        <button class="btn btn-danger" id="btnClearWill">清除遗嘱消息</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="overlay-inner" id="overlayInner"></div>
+  </div>
+
+  <script>
+    // ----- Config -----
+    const dataTypeMap = [
+      {type: 1, name: '新报文计划发班数据', topic: 'bocc', color: 'primary'},
+      {type: 2, name: '静态线路数据', topic: 'bocc', color: 'warning'},
+      {type: 3, name: '动态车辆数据', topic: 'bocc', color: 'info'},
+      {type: 4, name: '天府机场航班数据', topic: '', color: 'success'},
+      {type: 5, name: '应急发布', topic: 'emergency', color: 'danger'},
+
+      {type: 6, name: 'APP升级', topic: 'device_app_upgrade', color: 'primary'},
+      {type: 7, name: '业务指令', topic: 'action', color: 'warning'},
+      {type: 8, name: '指令', topic: 'action', color: 'info'},
+      {type: 9, name: '节目撤回', topic: 'message', color: 'success'},
+      {type: 10, name: '应急撤回', topic: 'emergency', color: 'danger'},
+
+      {type: 11, name: '老报文计划发班', topic: 'bocc', color: 'primary'},
+      {type: 12, name: '节目清单', topic: 'message', color: 'warning'},
+      {type: 13, name: '头尾腰牌消息', topic: 'label', color: 'info'},
+      {type: 14, name: '头尾腰牌回调', topic: 'label', color: 'success'},
+      {type: 15, name: '公交车可占道信息', topic: '', color: 'danger'},
+
+      {type: 99, name: '平台确认信息', topic: 'success', color: 'primary'},
+    ];
+
+    const envHosts = {
+      prod: window.location.origin,
+      test: 'http://10.30.148.105:8080'
+    };
+
+    const endpoints = {
+      ssePath: '/api/logs/stream', // GET SSE
+      mqttConnect: '/api/mqtt/connect', // POST { mac, env }
+      mqttCloseAll: '/api/mqtt/close-all', // POST
+      mqttClearWill: '/api/mqtt/clear-will', // POST
+      cacheDevice: '/api/cache/device/update', // POST { mac }
+      cacheLine: '/api/cache/line/update', // POST
+      pushAllStaticLines: '/api/lines/static/push-all', // POST
+      repushPrograms: '/api/programs/repush', // POST
+      getCurrentDeviceStatic: '/api/lines/static/current', // GET ?mac=
+      getTianfuFlights: '/api/airport/tianfu/flights', // GET
+      getBusLane: '/api/bus/lane/occupation', // GET
+    };
+
+    // ----- State -----
+    const panelStates = new Map(); // type -> { bodyEl, counterEl, count }
+    let paused = false;
+    let dropCounter = 0;
+    let recvCounter = 0;
+    let currentEnv = 'test';
+    let currentMac = '';
+    let eventSource = null;
+    let reconnectTimer = null;
+    let reconnectAttempts = 0;
+    const maxLogsPerPanel = 200;
+
+    // ----- DOM utils -----
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function showToast(text) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = text;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 1800);
+    }
+
+    function setSseStatus(status) {
+      const dot = $('#sseDot');
+      const text = $('#sseText');
+      dot.className = 'dot';
+      switch (status) {
+        case 'connecting':
+          dot.classList.add('connecting');
+          text.textContent = '连接中...';
+          break;
+        case 'connected':
+          dot.classList.add('connected');
+          text.textContent = '已连接';
+          break;
+        case 'error':
+          dot.classList.add('error');
+          text.textContent = '连接异常，重试中...';
+          break;
+        default:
+          text.textContent = '未连接';
+          break;
+      }
+    }
+
+    function getApiBase() {
+      return envHosts[currentEnv] || window.location.origin;
+    }
+
+    function safeStringify(obj) {
+      try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+    }
+
+    function prettyPrintJson(json) {
+      const code = document.createElement('code');
+      code.className = 'language-json';
+      code.textContent = typeof json === 'string' ? json : safeStringify(json);
+      const pre = document.createElement('pre');
+      pre.appendChild(code);
+      // Use highlight.js if loaded
+      if (window.hljs && hljs.highlightElement) {
+        try { hljs.highlightElement(code); } catch {}
+      }
+      return pre;
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+      }
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch {}
+      ta.remove();
+      return Promise.resolve();
+    }
+
+    function makePanel({ type, name, topic, color }) {
+      const card = document.createElement('div');
+      card.className = 'panel';
+      card.id = `panel-${type}`;
+
+      const header = document.createElement('div');
+      header.className = 'panel-header';
+
+      const title = document.createElement('div');
+      title.className = 'panel-title';
+      const chip = document.createElement('span');
+      chip.className = `chip ${color}`;
+      chip.textContent = type;
+      const nameEl = document.createElement('span');
+      nameEl.textContent = name;
+      const topicEl = document.createElement('span');
+      topicEl.className = 'badge';
+      topicEl.textContent = topic || 'no-topic';
+      const counter = document.createElement('span');
+      counter.className = 'badge';
+      counter.textContent = '0';
+
+      title.appendChild(chip);
+      title.appendChild(nameEl);
+      title.appendChild(topicEl);
+      title.appendChild(counter);
+
+      const actions = document.createElement('div');
+      actions.className = 'panel-actions';
+      const btnClear = document.createElement('button');
+      btnClear.className = 'icon-btn';
+      btnClear.title = '清空窗口';
+      btnClear.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+      const btnMax = document.createElement('button');
+      btnMax.className = 'icon-btn';
+      btnMax.title = '放大';
+      btnMax.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+
+      actions.appendChild(btnClear);
+      actions.appendChild(btnMax);
+
+      header.appendChild(title);
+      header.appendChild(actions);
+
+      const body = document.createElement('div');
+      body.className = 'panel-body';
+
+      card.appendChild(header);
+      card.appendChild(body);
+
+      // Events
+      btnClear.addEventListener('click', () => {
+        body.innerHTML = '';
+        state.count = 0; counter.textContent = '0';
+      });
+      btnMax.addEventListener('click', () => openOverlay(card.cloneNode(true), name));
+
+      const state = { bodyEl: body, counterEl: counter, count: 0 };
+      panelStates.set(type, state);
+
+      return card;
+    }
+
+    function appendLogToPanel(type, payloadObj, rawText) {
+      const state = panelStates.get(type);
+      if (!state) return;
+      if (paused) { dropCounter++; $('#dropCount').textContent = '丢弃 ' + dropCounter; return; }
+
+      const now = new Date();
+      const time = now.toLocaleTimeString('zh-CN', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
+
+      const log = document.createElement('div');
+      log.className = 'log-item';
+      log.title = '点击复制 JSON';
+
+      const meta = document.createElement('div');
+      meta.className = 'log-meta';
+      meta.innerHTML = `<span class="dot connected"></span><span>${time}</span>`;
+
+      const json = document.createElement('div');
+      json.className = 'log-json';
+      const pre = prettyPrintJson(payloadObj ?? rawText);
+      json.appendChild(pre);
+
+      log.appendChild(meta);
+      log.appendChild(json);
+
+      log.addEventListener('click', () => {
+        const text = typeof payloadObj === 'string' ? payloadObj : safeStringify(payloadObj ?? rawText);
+        copyToClipboard(text).then(() => showToast('JSON 已复制'));
+      });
+
+      state.bodyEl.appendChild(log);
+      state.count++; state.counterEl.textContent = String(state.count);
+      recvCounter++; $('#recvCount').textContent = recvCounter + ' 条';
+
+      // Trim
+      const items = state.bodyEl.querySelectorAll('.log-item');
+      if (items.length > maxLogsPerPanel) {
+        for (let i = 0; i < items.length - maxLogsPerPanel; i++) items[i].remove();
+      }
+
+      // Auto scroll to bottom if near bottom
+      const { scrollTop, scrollHeight, clientHeight } = state.bodyEl;
+      if (scrollHeight - (scrollTop + clientHeight) < 120) {
+        state.bodyEl.scrollTo({ top: state.bodyEl.scrollHeight });
+      }
+    }
+
+    // ----- Overlay -----
+    function openOverlay(panelEl, title) {
+      const overlay = $('#overlay');
+      const inner = $('#overlayInner');
+      inner.innerHTML = '';
+      // Replace header actions in overlay: add close button
+      const header = panelEl.querySelector('.panel-header .panel-actions');
+      if (header) {
+        const btnClose = document.createElement('button');
+        btnClose.className = 'icon-btn';
+        btnClose.title = '退出全屏';
+        btnClose.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 9 3 9 3 3"/><polyline points="21 21 15 21 15 15"/><line x1="3" y1="3" x2="10" y2="10"/><line x1="21" y1="21" x2="14" y2="14"/></svg>';
+        btnClose.addEventListener('click', closeOverlay);
+        header.appendChild(btnClose);
+      }
+      panelEl.style.maxHeight = 'unset';
+      inner.appendChild(panelEl);
+      overlay.classList.add('active');
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); }, { once: true });
+    }
+    function closeOverlay() {
+      $('#overlay').classList.remove('active');
+      $('#overlayInner').innerHTML = '';
+    }
+
+    // ----- SSE -----
+    function connectSSE() {
+      cleanupSSE();
+      const mac = ($('#macInput').value || '').trim();
+      currentMac = mac;
+      const url = new URL(endpoints.ssePath, getApiBase());
+      if (mac) url.searchParams.set('mac', mac);
+      url.searchParams.set('env', currentEnv);
+
+      setSseStatus('connecting');
+      try {
+        eventSource = new EventSource(url.toString(), { withCredentials: true });
+      } catch (e) {
+        setSseStatus('error');
+        scheduleReconnect();
+        return;
+      }
+
+      eventSource.onopen = () => {
+        setSseStatus('connected');
+        reconnectAttempts = 0;
+      };
+
+      eventSource.onerror = () => {
+        setSseStatus('error');
+        scheduleReconnect();
+      };
+
+      eventSource.onmessage = (evt) => {
+        if (!evt || typeof evt.data !== 'string') return;
+        let obj = null;
+        try { obj = JSON.parse(evt.data); } catch { obj = null; }
+        let t = null;
+        if (obj && typeof obj === 'object') {
+          t = obj.dataType ?? obj.type ?? (obj.data && obj.data.type) ?? null;
+        }
+        const type = typeof t === 'number' ? t : parseInt(t, 10);
+        if (!Number.isFinite(type)) return; // unknown
+        appendLogToPanel(type, obj, evt.data);
+      };
+    }
+
+    function cleanupSSE() {
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      if (eventSource) {
+        try { eventSource.close(); } catch {}
+        eventSource = null;
+      }
+    }
+
+    function scheduleReconnect() {
+      cleanupSSE();
+      const delay = Math.min(15000, 1000 * Math.pow(2, Math.min(5, reconnectAttempts++)));
+      reconnectTimer = setTimeout(connectSSE, delay);
+    }
+
+    // ----- API calls -----
+    async function apiFetch(path, { method = 'GET', json, query } = {}) {
+      const url = new URL(path, getApiBase());
+      if (query) Object.entries(query).forEach(([k, v]) => url.searchParams.set(k, v));
+      const res = await fetch(url.toString(), {
+        method,
+        headers: json ? { 'Content-Type': 'application/json' } : undefined,
+        body: json ? JSON.stringify(json) : undefined,
+        credentials: 'include',
+        mode: 'cors'
+      });
+      const text = await res.text();
+      let data = text;
+      try { data = JSON.parse(text); } catch {}
+      if (!res.ok) throw new Error(typeof data === 'string' ? data : (data.message || '请求失败'));
+      return data;
+    }
+
+    function assertMac() {
+      const mac = ($('#macInput').value || '').trim();
+      if (!mac) { showToast('请先输入设备 MAC'); return null; }
+      return mac;
+    }
+
+    // ----- Init -----
+    function init() {
+      // Build panels
+      const grid = $('#grid');
+      dataTypeMap.forEach(cfg => grid.appendChild(makePanel(cfg)));
+
+      // Env radios
+      $$('input[name="env"]').forEach(r => r.addEventListener('change', (e) => {
+        currentEnv = e.target.value;
+        showToast(`已切换到${currentEnv === 'prod' ? '正式' : '测试'}环境`);
+        connectSSE();
+      }));
+
+      // Buttons
+      $('#btnPause').addEventListener('click', () => {
+        paused = true; $('#btnPause').disabled = true; $('#btnResume').disabled = false; showToast('已暂停接收');
+      });
+      $('#btnResume').addEventListener('click', () => {
+        paused = false; $('#btnPause').disabled = false; $('#btnResume').disabled = true; showToast('已恢复接收');
+      });
+      $('#btnClearAll').addEventListener('click', () => {
+        panelStates.forEach(s => { s.bodyEl.innerHTML = ''; s.count = 0; s.counterEl.textContent = '0'; });
+        recvCounter = 0; dropCounter = 0; $('#recvCount').textContent = '0 条'; $('#dropCount').textContent = '丢弃 0';
+      });
+
+      $('#btnMqttConnect').addEventListener('click', async () => {
+        const mac = assertMac(); if (!mac) return;
+        try {
+          await apiFetch(endpoints.mqttConnect, { method: 'POST', json: { mac, env: currentEnv } });
+          showToast('MQTT 已连接');
+          connectSSE();
+        } catch (e) {
+          showToast('MQTT 连接失败：' + e.message);
+        }
+      });
+
+      // Cache and data actions
+      $('#btnUpdateDeviceCache').addEventListener('click', async () => {
+        const mac = assertMac(); if (!mac) return;
+        try { await apiFetch(endpoints.cacheDevice, { method: 'POST', json: { mac } }); showToast('已触发更新设备缓存'); }
+        catch (e) { showToast('失败：' + e.message); }
+      });
+      $('#btnUpdateLineCache').addEventListener('click', async () => {
+        try { await apiFetch(endpoints.cacheLine, { method: 'POST' }); showToast('已触发更新线路缓存'); }
+        catch (e) { showToast('失败：' + e.message); }
+      });
+      $('#btnPushAllStaticLines').addEventListener('click', async () => {
+        try { await apiFetch(endpoints.pushAllStaticLines, { method: 'POST' }); showToast('已触发推送全部静态线路'); }
+        catch (e) { showToast('失败：' + e.message); }
+      });
+      $('#btnRepushPrograms').addEventListener('click', async () => {
+        try { await apiFetch(endpoints.repushPrograms, { method: 'POST' }); showToast('已触发重新推送节目清单'); }
+        catch (e) { showToast('失败：' + e.message); }
+      });
+      $('#btnGetCurrentDeviceStatic').addEventListener('click', async () => {
+        const mac = assertMac(); if (!mac) return;
+        try {
+          const data = await apiFetch(endpoints.getCurrentDeviceStatic, { method: 'GET', query: { mac } });
+          appendLogToPanel(2, data, typeof data === 'string' ? data : safeStringify(data));
+          showToast('已拉取当前设备静态线路');
+        } catch (e) { showToast('失败：' + e.message); }
+      });
+      $('#btnGetTianfuFlights').addEventListener('click', async () => {
+        try {
+          const data = await apiFetch(endpoints.getTianfuFlights);
+          appendLogToPanel(4, data, typeof data === 'string' ? data : safeStringify(data));
+          showToast('已获取天府机场航班数据');
+        } catch (e) { showToast('失败：' + e.message); }
+      });
+      $('#btnGetBusLane').addEventListener('click', async () => {
+        try {
+          const data = await apiFetch(endpoints.getBusLane);
+          appendLogToPanel(15, data, typeof data === 'string' ? data : safeStringify(data));
+          showToast('已获取公交车道信息');
+        } catch (e) { showToast('失败：' + e.message); }
+      });
+      $('#btnCloseAllMqtt').addEventListener('click', async () => {
+        try { await apiFetch(endpoints.mqttCloseAll, { method: 'POST' }); showToast('已关闭所有 MQTT'); }
+        catch (e) { showToast('失败：' + e.message); }
+      });
+      $('#btnClearWill').addEventListener('click', async () => {
+        try { await apiFetch(endpoints.mqttClearWill, { method: 'POST' }); showToast('已清除遗嘱消息'); }
+        catch (e) { showToast('失败：' + e.message); }
+      });
+
+      // Auto connect SSE at start
+      connectSSE();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
